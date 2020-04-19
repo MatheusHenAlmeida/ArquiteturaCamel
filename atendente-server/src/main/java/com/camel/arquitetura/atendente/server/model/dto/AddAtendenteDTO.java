@@ -15,6 +15,16 @@ public class AddAtendenteDTO {
     private Cargos cargo;
 
     private Niveis nivel;
+    
+    private String nome;
+    
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
     public Long getUserId() {
         return userId;
