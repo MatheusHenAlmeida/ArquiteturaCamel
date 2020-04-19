@@ -1,0 +1,88 @@
+{
+	"info": {
+		"_postman_id": "2d29b6a1-3d83-4268-9337-7c0d859a1188",
+		"name": "Atendentes-Domain",
+		"description": "Chamadas para aplicação responsável por gerenciar os atendentes da plataforma",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:8081/atendentes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8081/atendentes",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"atendentes"
+					]
+				},
+				"description": "Pega todos os atendentes e se você adicionar um /{id} no final da url, retorna os dados do atendente com o id especificado"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8081/atendentes/create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": 2,\n    \"nome\": \"Clara\",\n    \"base\": \"GRANDE_SP\",\n    \"cargo\": \"SUPERVISOR\",\n    \"nivel\": \"JUNIOR\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/atendentes/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"atendentes",
+						"create"
+					]
+				},
+				"description": "Faz requisição para registrar novos atendentes no sistema"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8081/atendentes/remove",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\": 4,\n\t\"removeId\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/atendentes/remove",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"atendentes",
+						"remove"
+					]
+				},
+				"description": "Remove um atendente. Somente supervisores podem remover analistas e estagiarios, além de não poderem remover outros supervisores e nem a si mesmos"
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

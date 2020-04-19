@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.camel.arquitetura.atendente.server.entity.Atendente;
 import com.camel.arquitetura.atendente.server.enums.Cargos;
 import com.camel.arquitetura.atendente.server.model.dto.AddAtendenteDTO;
+import com.camel.arquitetura.atendente.server.model.dto.RemoveAtendenteDTO;
 import com.camel.arquitetura.atendente.server.repository.AtendenteRepository;
 
 @RestController
@@ -45,7 +47,7 @@ public class AtendenteController {
     }
     
     @PostMapping("/create")
-    public Atendente criaAtendente(@RequestBody AddAtendenteDTO addAtendenteDTO) {
+    public Atendente createAtendente(@RequestBody AddAtendenteDTO addAtendenteDTO) {
         Long userId = addAtendenteDTO.getUserId();
         Cargos cargo = addAtendenteDTO.getCargo();
         
@@ -62,5 +64,19 @@ public class AtendenteController {
         }
             
         return null;
+    }
+    
+    @DeleteMapping("/remove")
+    public Atendente removeAtendente(@RequestBody RemoveAtendenteDTO removeAtendenteDTO) {
+        Atendente requirer = atendenteRepository.findById(removeAtendenteDTO.getUserId()).get();
+        Atendente atendenteToBeRemoved =  atendenteRepository.findById(removeAtendenteDTO.getRemoveId()).get();
+        
+        if (!requirer.getCargo().equals(Cargos.SUPERVISOR) ||
+                requirer.getId().equals(atendenteToBeRemoved.getId()) || 
+                atendenteToBeRemoved.getCargo().equals(Cargos.SUPERVISOR))
+            return null;
+       
+        atendenteRepository.deleteById(removeAtendenteDTO.getRemoveId());
+        return atendenteToBeRemoved;
     }
 }
