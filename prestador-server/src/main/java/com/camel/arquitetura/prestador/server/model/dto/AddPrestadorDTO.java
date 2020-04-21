@@ -1,16 +1,11 @@
-package com.camel.arquitetura.cliente.server.model.dto;
+package com.camel.arquitetura.prestador.server.model.dto;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import com.camel.arquitetura.prestador.server.enums.BaseIdentifier;
 
-import com.camel.arquitetura.cliente.server.enums.BaseIdentifier;
-
-public class AddClienteDTO {
+public class AddPrestadorDTO {
     private String razaoSocial;
     
     private BaseIdentifier base;
-    
-    private String segmento;
     
     private String endereco;
     
@@ -32,14 +27,6 @@ public class AddClienteDTO {
 
     public void setBase(BaseIdentifier base) {
         this.base = base;
-    }
-
-    public String getSegmento() {
-        return segmento;
-    }
-
-    public void setSegmento(String segmento) {
-        this.segmento = segmento;
     }
 
     public String getEndereco() {
@@ -67,11 +54,7 @@ public class AddClienteDTO {
     }
     
     public boolean isValid() {
-        return this.base != null &&
-                this.email != null &&
-                this.endereco != null &&
-                this.telefone != null &&
-                this.razaoSocial != null;
-        
+        return this.base != null && this.telefone != null
+                && this.email !=null && this.razaoSocial != null;
     }
 }
