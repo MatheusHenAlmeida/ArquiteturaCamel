@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.camel.arquitetura.prestador.server.entity.Prestador;
+import com.camel.arquitetura.prestador.server.enums.BaseIdentifier;
 import com.camel.arquitetura.prestador.server.model.dto.AddPrestadorDTO;
 import com.camel.arquitetura.prestador.server.repository.PrestadorRepository;
 
@@ -40,6 +41,12 @@ public class PrestadorController {
         if (prestador.isPresent())
             return prestador.get();
         return null;
+    }
+    
+    @GetMapping("/base/{name}")
+    public Prestador getById(@PathVariable("name") String base) {
+        Prestador prestadorDaRegiao = prestadorRepository.findByBase(BaseIdentifier.valueOf(base)).get(0);
+        return prestadorDaRegiao;
     }
     
     @PostMapping("/create")

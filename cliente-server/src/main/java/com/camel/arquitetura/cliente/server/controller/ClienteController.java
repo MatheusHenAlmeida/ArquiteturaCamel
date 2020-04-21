@@ -1,4 +1,4 @@
-package com.camel.arquitetura.cliente.server;
+package com.camel.arquitetura.cliente.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,19 +39,7 @@ public class ClienteController {
     
     @GetMapping("/razao-social/{name}")
     public Cliente getByName(@PathVariable("name") String razaoSocial) {
-        List<Cliente> list = getAll().getBody();
-        Cliente cliente = new Cliente();
-        list.forEach(item -> {
-            if (item.getRazaoSocial().equals(razaoSocial)) {
-                cliente.setBase(item.getBase());
-                cliente.setId(item.getId());
-                cliente.setEmail(item.getEmail());
-                cliente.setEndereco(item.getEndereco());
-                cliente.setRazaoSocial(item.getRazaoSocial());
-                cliente.setSegmento(item.getSegmento());
-                cliente.setTelefone(item.getTelefone());
-            }
-        });
+        Cliente cliente = clienteRepository.findByRazaoSocial(razaoSocial).get(0);
         return cliente;
     }
         
