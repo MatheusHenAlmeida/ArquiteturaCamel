@@ -55,7 +55,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8082/clientes/delete/9",
+			"name": "localhost:8082/clientes/delete/{id}",
 			"request": {
 				"method": "DELETE",
 				"header": [],
@@ -71,7 +71,7 @@
 						"9"
 					]
 				},
-				"description": "Responsavel por remover um cliente"
+				"description": "Responsavel por remover um cliente com o id especificado na url"
 			},
 			"response": []
 		}

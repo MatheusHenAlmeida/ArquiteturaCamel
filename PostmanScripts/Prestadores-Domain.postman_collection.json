@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "6e01b5e7-19f6-44ef-965c-6d76dff660ad",
+		"name": "Prestadores-Domain",
+		"description": "Aplicação responsável por gerenciar os prestadores homologados da companhia",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:8083/prestadores",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/prestadores",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"prestadores"
+					]
+				},
+				"description": "Responsável por trazer a lista de todos prestadores cadastrados na base ou, por meio do id fornecido no final da url (\"/{id}\"), trazer os dados do prestador específico"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8083/prestadores/create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"razaoSocial\": \"Data Assistencia Tecnica Ltda\",\r\n    \"base\": \"LITORAL\",\r\n    \"endereco\": \"Rua dos Incas, 123\",\r\n    \"email\": \"matheushdealmeida@gmail.com\",\r\n    \"telefone\": \"11 432 573 432\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8083/prestadores/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"prestadores",
+						"create"
+					]
+				},
+				"description": "Responsável por cadastrar um novo prestador na base de dados"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8083/prestadores/delete/{id}",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/prestadores/delete/7",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"prestadores",
+						"delete",
+						"7"
+					]
+				},
+				"description": "Endpoint responsável por remover prestador com o id especificado na url do sistema"
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
