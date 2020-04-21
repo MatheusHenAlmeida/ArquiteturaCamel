@@ -2,7 +2,7 @@
 
 TODO:
 - ~~Criar Dockerfile para db de prestadores~~
-- Criar servico para prestadores
+- ~~Criar servico para prestadores~~
 - Criar script para buildar todos os containeres
 - Criar script para subir containeres
 - Criar DockerFile para db para as ordens de serviço
