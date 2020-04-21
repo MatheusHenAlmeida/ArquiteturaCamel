@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.camel.arquitetura.cliente.server.entity.Cliente;
@@ -25,16 +27,34 @@ public class ClienteController {
     private ClienteRepository clienteRepository;
     
     @GetMapping
-    public List<Cliente> getAll() {
+    public ResponseEntity<List<Cliente>> getAll() {
         List<Cliente> clientes = new ArrayList<Cliente>();
         Iterable<Cliente> clientesFromRepository = clienteRepository.findAll();
         
         clientesFromRepository.forEach(cliente -> {
             clientes.add(cliente);
         });
-        return clientes;
+        return ResponseEntity.ok(clientes);
     }
     
+    @GetMapping("/razao-social/{name}")
+    public Cliente getByName(@PathVariable("name") String razaoSocial) {
+        List<Cliente> list = getAll().getBody();
+        Cliente cliente = new Cliente();
+        list.forEach(item -> {
+            if (item.getRazaoSocial().equals(razaoSocial)) {
+                cliente.setBase(item.getBase());
+                cliente.setId(item.getId());
+                cliente.setEmail(item.getEmail());
+                cliente.setEndereco(item.getEndereco());
+                cliente.setRazaoSocial(item.getRazaoSocial());
+                cliente.setSegmento(item.getSegmento());
+                cliente.setTelefone(item.getTelefone());
+            }
+        });
+        return cliente;
+    }
+        
     @GetMapping("/{id}")
     public Cliente getById(@PathVariable Long id) {
         List<Cliente> clientes = new ArrayList<Cliente>();
