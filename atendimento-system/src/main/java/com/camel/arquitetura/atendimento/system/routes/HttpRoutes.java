@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.camel.arquitetura.atendimento.system.model.dto.AtendenteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
+import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
 
 @Component
 public class HttpRoutes extends RouteBuilder {
@@ -17,6 +18,9 @@ public class HttpRoutes extends RouteBuilder {
     
     @Value("${hostname.cliente-server}")
     private String clienteUrl;
+    
+    @Value("${hostname.prestador-server}")
+    private String prestadorUrl;
 
     @Override
     public void configure() throws Exception {
@@ -42,6 +46,14 @@ public class HttpRoutes extends RouteBuilder {
                     .setBody(constant(""))
                 .endChoice()
             .end();
+        
+        from("direct:get-prestador-by-base")
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
+            .setBody(simple(""))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            ;
     }
 
 }
