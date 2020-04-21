@@ -1,7 +1,7 @@
 # ArquiteturaCamel
 
 TODO:
-- Criar Dockerfile para db de prestadores
+- ~~Criar Dockerfile para db de prestadores~~
 - Criar servico para prestadores
 - Criar script para buildar todos os containeres
 - Criar script para subir containeres

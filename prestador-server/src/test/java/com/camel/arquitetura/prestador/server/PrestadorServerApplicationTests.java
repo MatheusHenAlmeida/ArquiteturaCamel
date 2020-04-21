@@ -1,0 +1,13 @@
+package com.camel.arquitetura.prestador.server;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class PrestadorServerApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
