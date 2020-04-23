@@ -1,0 +1,58 @@
+{
+	"info": {
+		"_postman_id": "2601ab1c-7fb7-45ae-a7e3-049b8f58ed91",
+		"name": "Atendimento-System",
+		"description": "Sistema de atendimento de assistância técnica",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:8080/ordem-servico/create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\": 1,\n\t\"nomeCliente\": \"Padaria Titanic Ltda\",\n\t\"descricao\": \"Forno com problemas nas fagulhas\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/ordem-servico/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ordem-servico",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/ordem-servico",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/ordem-servico",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ordem-servico"
+					]
+				},
+				"description": "Pega todas as ordens de serviço no banco de dados. Com o uso do \"/{id}\" ele consegue retornar a ordem de serviço desejada"
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

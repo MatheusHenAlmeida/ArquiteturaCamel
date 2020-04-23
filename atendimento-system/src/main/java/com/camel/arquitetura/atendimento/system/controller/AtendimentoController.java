@@ -1,9 +1,13 @@
 package com.camel.arquitetura.atendimento.system.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +25,7 @@ public class AtendimentoController {
     @Autowired
     private ProducerTemplate template;
     
-    @GetMapping
+    @GetMapping("/hello-world")
     public String helloWorld() {
         String response = template.requestBody("direct:hello-world", "", String.class);
         
@@ -40,13 +44,34 @@ public class AtendimentoController {
             return "Só um atendente da mesma base do cliente pode abrir uma OS";
         }
         
+        PrestadorResponseDTO prestador;
+        
         try {
-            PrestadorResponseDTO prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
+            prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
             System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
             return "Não há prestador na região";
         }
         
+        Map<String, Object> headers = new HashMap<String, Object>();
+        headers.put("cliente", cliente);
+        headers.put("prestador", prestador);
+        headers.put("descricao", createOrdemServicoDTO.getDescricao());
+        
+        template.sendBodyAndHeaders("direct:insert-ordem-servico", "", headers);
+        
         return null;
+    }
+    
+    @GetMapping
+    public String getAll() {
+        String response = template.requestBody("direct:get-ordens-servico", "", String.class);
+        return response;
+    }
+    
+    @GetMapping("/{id}")
+    public String getById(@PathVariable Long id) {
+    String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+        return response;
     }
 }
