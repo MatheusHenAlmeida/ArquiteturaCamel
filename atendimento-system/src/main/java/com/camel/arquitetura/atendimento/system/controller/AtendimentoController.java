@@ -1,6 +1,9 @@
 package com.camel.arquitetura.atendimento.system.controller;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.CamelExecutionException;
@@ -13,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.camel.arquitetura.atendimento.system.model.OrdemServico;
 import com.camel.arquitetura.atendimento.system.model.dto.AtendenteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.CreateOrdemServicoDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @RestController
 @RequestMapping("/ordem-servico")
@@ -33,7 +38,7 @@ public class AtendimentoController {
     }
     
     @PostMapping("/create")
-    public String createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Exception {
+    public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Exception {
         AtendenteResponseDTO atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
         ClienteResponseDTO cliente = new ClienteResponseDTO();        
         try {
@@ -41,16 +46,16 @@ public class AtendimentoController {
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(), 
                     "base", atendente.getBase(), ClienteResponseDTO.class);
         } catch (CamelExecutionException e) {
-            return "Só um atendente da mesma base do cliente pode abrir uma OS";
+//            return "Só um atendente da mesma base do cliente pode abrir uma OS";
         }
         
-        PrestadorResponseDTO prestador;
+        PrestadorResponseDTO prestador = new PrestadorResponseDTO();
         
         try {
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
             System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
-            return "Não há prestador na região";
+//            return "Não há prestador na região";
         }
         
         Map<String, Object> headers = new HashMap<String, Object>();
@@ -58,20 +63,23 @@ public class AtendimentoController {
         headers.put("prestador", prestador);
         headers.put("descricao", createOrdemServicoDTO.getDescricao());
         
-        template.sendBodyAndHeaders("direct:insert-ordem-servico", "", headers);
+        String os = template.requestBodyAndHeaders("direct:insert-ordem-servico", "", headers, String.class);
         
-        return null;
+        return new Gson().fromJson(os, OrdemServico.class);
     }
     
     @GetMapping
-    public String getAll() {
+    public List<OrdemServico> getAll() {
         String response = template.requestBody("direct:get-ordens-servico", "", String.class);
-        return response;
+        Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
+        List<OrdemServico> list = new Gson().fromJson(response, listType);
+        return list;
     }
     
     @GetMapping("/{id}")
-    public String getById(@PathVariable Long id) {
-    String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
-        return response;
+    public OrdemServico getById(@PathVariable Long id) {
+        String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+        OrdemServico os = new Gson().fromJson(response, OrdemServico.class);
+        return os;
     }
 }

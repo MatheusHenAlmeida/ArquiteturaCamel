@@ -38,7 +38,11 @@ public class SQLRoutes extends RouteBuilder {
                     + "VALUES ('${header.prestador.getRazaoSocial()}', '${header.prestador.getEmail()}', "
                     + "'${header.prestador.getTelefone()}', '${header.cliente.getRazaoSocial()}', "
                     + "'${header.cliente.getEndereco()}', '${header.cliente.getEmail()}',"
-                    + "'${header.cliente.getTelefone()}', '${header.descricao}')");
+                    + "'${header.cliente.getTelefone()}', '${header.descricao}')")
+            .to("sql:SELECT * FROM ordem_servico WHERE id = LAST_INSERT_ID()")
+            .process(new GenerateOrdemServicoListProcessor())
+            .process(new GetFirstOrdemServicoProcessor())
+            .marshal().json(JsonLibrary.Gson);
     }
 
 }
