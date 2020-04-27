@@ -10,6 +10,7 @@ CREATE TABLE ordem_servico(
     cliente_endereco VARCHAR(255),
     cliente_email VARCHAR(255),
     cliente_telefone VARCHAR(255),
+    atendida BOOLEAN DEFAULT false,
     descricao TEXT
 );
 
