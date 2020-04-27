@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8081/atendentes",
+			"name": "Pega Atendentes",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -26,7 +26,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8081/atendentes/create",
+			"name": "Cria Atendentes",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -55,7 +55,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8081/atendentes/remove",
+			"name": "Apaga Atendentes",
 			"request": {
 				"method": "DELETE",
 				"header": [],

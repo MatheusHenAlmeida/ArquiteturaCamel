@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8082/clientes",
+			"name": "Pega clientes",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -26,7 +26,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8082/clientes/create",
+			"name": "Cria cliente",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -55,7 +55,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8082/clientes/delete/{id}",
+			"name": "Apaga Cliente",
 			"request": {
 				"method": "DELETE",
 				"header": [],

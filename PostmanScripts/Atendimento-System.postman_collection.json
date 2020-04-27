@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8080/ordem-servico/create",
+			"name": "Criar OS",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -30,12 +30,13 @@
 						"ordem-servico",
 						"create"
 					]
-				}
+				},
+				"description": "Responsável por verificar as informações do atendente, cliente e prestador, para assim criar a OS e salvar no DB"
 			},
 			"response": []
 		},
 		{
-			"name": "localhost:8080/ordem-servico",
+			"name": "Pegar OS's",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -49,7 +50,7 @@
 						"ordem-servico"
 					]
 				},
-				"description": "Pega todas as ordens de serviço no banco de dados. Com o uso do \"/{id}\" ele consegue retornar a ordem de serviço desejada"
+				"description": "Pega todas as ordens de serviço no banco de dados. Com o uso do \"/{id}\" ele consegue retornar a ordem de serviço desejada.\nAdicionando \"/opened\", ele lista todas as OS's abertas e adicionando \"/closed\", ele lista todas as OS's fechadas."
 			},
 			"response": []
 		}

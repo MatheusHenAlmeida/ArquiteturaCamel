@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8083/prestadores",
+			"name": "Pega prestadores",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -26,7 +26,28 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8083/prestadores/create",
+			"name": "Pega prestador por região",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/prestadores/base/GRANDE_SP",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"prestadores",
+						"base",
+						"GRANDE_SP"
+					]
+				},
+				"description": "Adicionando o \"/base/{regiao}\" ele retorna o prestador da região específicada"
+			},
+			"response": []
+		},
+		{
+			"name": "Cria prestador",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -55,7 +76,7 @@
 			"response": []
 		},
 		{
-			"name": "localhost:8083/prestadores/delete/{id}",
+			"name": "Apagar prestador",
 			"request": {
 				"method": "DELETE",
 				"header": [],
