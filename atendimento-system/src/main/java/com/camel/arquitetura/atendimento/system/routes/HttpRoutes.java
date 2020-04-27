@@ -52,8 +52,7 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
             .setBody(simple(""))
             .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
-            ;
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
     }
 
 }

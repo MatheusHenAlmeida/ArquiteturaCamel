@@ -1,15 +1,11 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 
 import com.camel.arquitetura.atendimento.system.model.OrdemServico;
+import com.camel.arquitetura.atendimento.system.processors.FilterByStatusProcessor;
 import com.camel.arquitetura.atendimento.system.processors.GenerateOrdemServicoListProcessor;
 import com.camel.arquitetura.atendimento.system.processors.GetFirstOrdemServicoProcessor;
 
@@ -21,6 +17,12 @@ public class SQLRoutes extends RouteBuilder {
         from("direct:get-ordens-servico")
             .to("sql:SELECT * FROM ordem_servico")
             .process(new GenerateOrdemServicoListProcessor())
+            .marshal().json(JsonLibrary.Gson);
+        
+        from("direct:get-ordens-by-status")
+            .to("direct:get-ordens-servico")
+            .unmarshal().json(JsonLibrary.Gson, OrdemServico[].class)
+            .process(new FilterByStatusProcessor())
             .marshal().json(JsonLibrary.Gson);
         
         from("direct:get-ordem-by-id")

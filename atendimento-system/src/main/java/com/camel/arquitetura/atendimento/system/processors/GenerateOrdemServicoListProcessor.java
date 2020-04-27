@@ -27,10 +27,12 @@ public class GenerateOrdemServicoListProcessor implements Processor {
             ordem.setPrestadorNome(map.get("prestador_nome").toString());
             ordem.setPrestadorTelefone(map.get("prestador_telefone").toString());
             ordem.setDescricao(map.get("descricao").toString());
+            ordem.setAtendida((boolean) map.get("atendida")); 
             
             ordens.add(ordem);
         });
         
+        exchange.getOut().setHeaders(exchange.getIn().getHeaders());
         exchange.getOut().setBody(ordens);
     }
 }

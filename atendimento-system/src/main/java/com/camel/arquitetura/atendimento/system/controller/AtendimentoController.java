@@ -27,6 +27,7 @@ import com.google.gson.reflect.TypeToken;
 @RestController
 @RequestMapping("/ordem-servico")
 public class AtendimentoController {
+    // Só analista e supervisor podem fechar OS
     @Autowired
     private ProducerTemplate template;
     
@@ -46,6 +47,7 @@ public class AtendimentoController {
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(), 
                     "base", atendente.getBase(), ClienteResponseDTO.class);
         } catch (CamelExecutionException e) {
+            throw new Exception("Só um atendente da mesma base do cliente pode abrir uma OS");
 //            return "Só um atendente da mesma base do cliente pode abrir uma OS";
         }
         
@@ -55,6 +57,7 @@ public class AtendimentoController {
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
             System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
+            throw new Exception("Não há prestador na região");
 //            return "Não há prestador na região";
         }
         
@@ -71,6 +74,23 @@ public class AtendimentoController {
     @GetMapping
     public List<OrdemServico> getAll() {
         String response = template.requestBody("direct:get-ordens-servico", "", String.class);
+        Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
+        List<OrdemServico> list = new Gson().fromJson(response, listType);
+        return list;
+    }
+    
+    @GetMapping("/opened")
+    public List<OrdemServico> getAllOpened() {
+        return filterByStatus(false);
+    }
+    
+    @GetMapping("/closed")
+    public List<OrdemServico> getAllClosed() {
+        return filterByStatus(true);
+    }
+    
+    private List<OrdemServico> filterByStatus(boolean status) {
+        String response = template.requestBodyAndHeader("direct:get-ordens-by-status", "", "os-status", status, String.class);
         Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
         List<OrdemServico> list = new Gson().fromJson(response, listType);
         return list;

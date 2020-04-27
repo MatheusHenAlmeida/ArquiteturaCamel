@@ -10,6 +10,14 @@ public class OrdemServico {
     private String clienteEmail;
     private String clienteTelefone;
     private String descricao;
+    private boolean atendida;
+    
+    public boolean isAtendida() {
+        return atendida;
+    }
+    public void setAtendida(boolean atendida) {
+        this.atendida = atendida;
+    }
     public Long getId() {
         return id;
     }
