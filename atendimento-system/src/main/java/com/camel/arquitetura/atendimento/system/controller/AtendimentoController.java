@@ -28,7 +28,6 @@ import com.google.gson.reflect.TypeToken;
 @RestController
 @RequestMapping("/ordem-servico")
 public class AtendimentoController {
-    // Só analista e supervisor podem fechar OS
     @Autowired
     private ProducerTemplate template;
     
@@ -49,7 +48,6 @@ public class AtendimentoController {
                     "base", atendente.getBase(), ClienteResponseDTO.class);
         } catch (CamelExecutionException e) {
             throw new Exception("Só um atendente da mesma base do cliente pode abrir uma OS");
-//            return "Só um atendente da mesma base do cliente pode abrir uma OS";
         }
         
         PrestadorResponseDTO prestador = new PrestadorResponseDTO();
@@ -59,7 +57,6 @@ public class AtendimentoController {
             System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
             throw new Exception("Não há prestador na região");
-//            return "Não há prestador na região";
         }
         
         Map<String, Object> headers = new HashMap<String, Object>();
