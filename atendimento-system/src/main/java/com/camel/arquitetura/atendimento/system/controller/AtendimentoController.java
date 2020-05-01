@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -101,5 +102,29 @@ public class AtendimentoController {
         String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
         OrdemServico os = new Gson().fromJson(response, OrdemServico.class);
         return os;
+    }
+    
+    @GetMapping("{id}/close")
+    public OrdemServico closeOrdemServico(@RequestHeader Long userId, @PathVariable Long id) throws Exception {
+        if (userId == null) throw new Exception("User-Id deve ser fornecido");
+        AtendenteResponseDTO atendente = null;
+        try {
+            atendente = template.requestBody("direct:get-atendente", userId.toString(), AtendenteResponseDTO.class);
+        } catch (Exception e) {
+            throw new Exception("Atendente não encontrado");
+        }
+        
+        Map<String, Object> headers = new HashMap<String, Object>();
+        headers.put("user", atendente);
+        headers.put("id", id);
+        
+        OrdemServico ordemServico = null;
+        try {
+            ordemServico = template.requestBodyAndHeaders("direct:update-ordem-by-id", "", headers, OrdemServico.class);
+        } catch (Exception e) {
+            throw new Exception("Não foi possível fechar a ordem de serviço");
+        }
+        
+        return ordemServico;
     }
 }

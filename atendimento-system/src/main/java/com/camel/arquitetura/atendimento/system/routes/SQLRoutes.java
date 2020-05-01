@@ -4,6 +4,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 
+import com.camel.arquitetura.atendimento.system.enums.Cargos;
 import com.camel.arquitetura.atendimento.system.model.OrdemServico;
 import com.camel.arquitetura.atendimento.system.processors.FilterByStatusProcessor;
 import com.camel.arquitetura.atendimento.system.processors.GenerateOrdemServicoListProcessor;
@@ -32,8 +33,25 @@ public class SQLRoutes extends RouteBuilder {
             .process(new GetFirstOrdemServicoProcessor())
             .marshal().json(JsonLibrary.Gson);
         
+        from("direct:update-ordem-by-id")
+            .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
+            .setHeader("analista",constant(Cargos.ANALISTA)) 
+            .choice()
+                .when(simple("${header.user.getCargo()} != ${header.supervisor} and "
+                        + "${header.user.getCargo()} != ${header.analista}"))
+                    .throwException(new Exception("Só supervisores e analistas podem fechar OS's"))
+                .endChoice()
+            .end()
+            .setProperty("userId", simple("${header.id}"))
+            .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
+            .to("direct:get-ordem-by-id")
+            .unmarshal().json(JsonLibrary.Gson, OrdemServico.class);
+
+        
         from("direct:insert-ordem-servico")
-            .log("${header.cliente.getRazaoSocial()} - ${header.prestador.getRazaoSocial()} - ${header.descricao}")
+            .log("Cliente: ${header.cliente.getRazaoSocial()} - "
+                    + "Prestador: ${header.prestador.getRazaoSocial()} - "
+                    + "Descricao: ${header.descricao}")
             .toD("sql:INSERT INTO "
                     + "ordem_servico(prestador_nome, prestador_email, prestador_telefone, cliente_nome, "
                     + "cliente_endereco, cliente_email, cliente_telefone, descricao) "
