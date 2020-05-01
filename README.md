@@ -8,6 +8,3 @@ TODO:
 - ~~Criar DockerFile para db para as ordens de serviço~~
 - ~~Elaborar descritivo das regras de negocio do servico de geracao de OS's~~
 - Implementar servico de geracao de OS's e suas integracoes com Apache Camel
-
-- Implementar rota de envio de email (?)
-- Implementar rota para geracao de PDF da OS (?)
