@@ -12,6 +12,7 @@ import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
 import com.camel.arquitetura.atendimento.system.processors.BuildCreateClienteProcessor;
 import com.camel.arquitetura.atendimento.system.processors.FilterClientesByBaseProcessor;
+import com.camel.arquitetura.atendimento.system.processors.FilterPrestadoresByBaseProcessor;
 
 @Component
 public class HttpRoutes extends RouteBuilder {
@@ -36,6 +37,35 @@ public class HttpRoutes extends RouteBuilder {
             .setBody(simple(""))
             .to("http4://" + atendenteUrl)
             .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class);
+        
+        from("direct:get-prestadores")
+            .setBody(simple("${header.userId}"))
+            .to("direct:get-atendente")
+            .setProperty("atendente", simple("${body}"))
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .setBody(simple(""))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO[].class)
+            .process(new FilterPrestadoresByBaseProcessor());
+        
+        from("direct:get-prestador-by-id")
+            .setBody(simple("${header.userId}"))
+            .setProperty("ordemId", simple("${header.id}"))
+            .to("direct:get-atendente")
+            .setProperty("atendente", simple("${body}"))
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores/${property.ordemId}"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .setBody(simple(""))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .choice()
+                .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
+                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                .endChoice()
+            .end();
         
         from("direct:get-clientes")
             .setBody(simple("${header.userId}"))
