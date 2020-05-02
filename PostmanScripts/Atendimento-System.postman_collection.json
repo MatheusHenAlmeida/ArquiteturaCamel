@@ -113,7 +113,7 @@
 				"header": [
 					{
 						"key": "userId",
-						"value": "5",
+						"value": "1",
 						"type": "text"
 					}
 				],
@@ -138,6 +138,33 @@
 					]
 				},
 				"description": "Cria um cliente na mesma base do atendente, identificado pelo header userId"
+			},
+			"response": []
+		},
+		{
+			"name": "Apagar cliente",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "userId",
+						"value": "7",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/clientes/delete/11",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clientes",
+						"delete",
+						"11"
+					]
+				},
+				"description": "Apaga o cliente pelo id especificado na url, caso o atendente seja supervisor e da mesma base do cliente"
 			},
 			"response": []
 		}
