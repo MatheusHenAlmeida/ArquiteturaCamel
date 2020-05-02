@@ -81,6 +81,19 @@ public class HttpRoutes extends RouteBuilder {
             .to("http4://" + prestadorUrl)
             .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
         
+        from("direct:remove-prestador")
+            .setProperty("clienteId", simple("${body}"))
+            .setHeader("id", simple("${body}"))
+            .to("direct:get-prestador-by-id")
+            .setHeader("user", simple("${property.atendente}"))
+            .to("direct:supervisor-credentials")
+            .setBody(simple(""))
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores/delete/${property.clienteId}"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+        
         from("direct:get-clientes")
             .setBody(simple("${header.userId}"))
             .to("direct:get-atendente")
