@@ -34,19 +34,29 @@ public class SQLRoutes extends RouteBuilder {
             .marshal().json(JsonLibrary.Gson);
         
         from("direct:update-ordem-by-id")
-            .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
-            .setHeader("analista",constant(Cargos.ANALISTA)) 
-            .choice()
-                .when(simple("${header.user.getCargo()} != ${header.supervisor} and "
-                        + "${header.user.getCargo()} != ${header.analista}"))
-                    .throwException(new Exception("Só supervisores e analistas podem fechar OS's"))
-                .endChoice()
-            .end()
+            .to("direct:supervisor-analista-credentials")
             .setProperty("userId", simple("${header.id}"))
             .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
             .to("direct:get-ordem-by-id")
             .unmarshal().json(JsonLibrary.Gson, OrdemServico.class);
 
+        from("direct:supervisor-analista-credentials")
+            .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
+            .setHeader("analista",constant(Cargos.ANALISTA)) 
+            .choice()
+                .when(simple("${header.user.getCargo()} != ${header.supervisor} and "
+                        + "${header.user.getCargo()} != ${header.analista}"))
+                    .throwException(new Exception())
+                .endChoice()
+            .end();
+        
+        from("direct:supervisor-credentials")
+            .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
+            .choice()
+                .when(simple("${header.user.getCargo()} != ${header.supervisor}"))
+                    .throwException(new Exception())
+                .endChoice()
+            .end();
         
         from("direct:insert-ordem-servico")
             .log("Cliente: ${header.cliente.getRazaoSocial()} - "

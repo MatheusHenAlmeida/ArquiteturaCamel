@@ -1,9 +1,5 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -14,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.camel.arquitetura.atendimento.system.model.dto.AtendenteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
+import com.camel.arquitetura.atendimento.system.processors.BuildCreateClienteProcessor;
 import com.camel.arquitetura.atendimento.system.processors.FilterClientesByBaseProcessor;
 
 @Component
@@ -68,6 +65,19 @@ public class HttpRoutes extends RouteBuilder {
                     .throwException(new Exception(" Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
+        
+        from("direct:create-cliente")
+            .setProperty("dto", simple("${body}"))
+            .setBody(simple("${header.userId}"))
+            .to("direct:get-atendente")
+            .setHeader("user", simple("${body}"))
+            .to("direct:supervisor-analista-credentials")
+            .process(new BuildCreateClienteProcessor())
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+            .setHeader(Exchange.HTTP_PATH, simple("clientes/create"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .to("http4://" + clienteUrl)
+            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class);
         
         from("direct:get-cliente-by-name")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
