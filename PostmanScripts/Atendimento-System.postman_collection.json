@@ -53,6 +53,93 @@
 				"description": "Pega todas as ordens de serviço no banco de dados. Com o uso do \"/{id}\" ele consegue retornar a ordem de serviço desejada.\nAdicionando \"/opened\", ele lista todas as OS's abertas e adicionando \"/closed\", ele lista todas as OS's fechadas."
 			},
 			"response": []
+		},
+		{
+			"name": "Fechar OS",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "1",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/ordem-servico/1/close",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ordem-servico",
+						"1",
+						"close"
+					]
+				},
+				"description": "Fornecendo o id da OS e colocando o id do atendente no header userId, para que seja alterado o status da ordem de serviço no DB. Nota que só supervisores e analistas podem fechar as OS's."
+			},
+			"response": []
+		},
+		{
+			"name": "Pega clientes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/clientes",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clientes"
+					]
+				},
+				"description": "Pega clientes da mesma base do atendente. Deve ser fornecido o header userId com o id do atendente. Caso colocando o id do cliente no final da url, ele retornará os dados do cliente, só se o mesmo for da mesma base do atendente."
+			},
+			"response": []
+		},
+		{
+			"name": "Cria cliente",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "userId",
+						"value": "5",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"razaoSocial\": \"Data Saving Ltda\",\r\n    \"segmento\": \"Ferramentas\",\r\n    \"endereco\": \"Rua dos Incas, 123\",\r\n    \"email\": \"matheushdealmeida@gmail.com\",\r\n    \"telefone\": \"11 432 573 432\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/clientes/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"clientes",
+						"create"
+					]
+				},
+				"description": "Cria um cliente na mesma base do atendente, identificado pelo header userId"
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}
