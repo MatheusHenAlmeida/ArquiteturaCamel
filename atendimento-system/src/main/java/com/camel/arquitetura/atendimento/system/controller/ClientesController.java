@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,6 @@ import com.camel.arquitetura.atendimento.system.model.dto.CreateClienteRequestDT
 @RestController
 @RequestMapping("/clientes")
 public class ClientesController {
-    // Só supervisor pode apagar clientes e eles devem ser da mesma base
     @Autowired
     private ProducerTemplate producerTemplate;
     
@@ -59,6 +59,21 @@ public class ClientesController {
                     "userId", userId, ClienteResponseDTO.class);
         } catch (Exception e) {
             throw new Exception("Somente supervisores e analistas podem registrar clientes");
+        }
+        
+        return cliente;
+    }
+    
+    @DeleteMapping("/delete/{id}")
+    public ClienteResponseDTO removeCliente(@PathVariable Long id, @RequestHeader Long userId) throws Exception {
+        ClienteResponseDTO cliente = null;
+        
+        try {
+            // Apaga o cliente se o atendente for um supervisor da mesma região
+            cliente = producerTemplate.requestBodyAndHeader("direct:remove-cliente", id, 
+                    "userId", userId, ClienteResponseDTO.class);
+        } catch (Exception e) {
+            throw new Exception("Somente supervisores podem apagar clientes");
         }
         
         return cliente;
