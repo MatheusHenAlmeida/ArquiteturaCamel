@@ -167,6 +167,93 @@
 				"description": "Apaga o cliente pelo id especificado na url, caso o atendente seja supervisor e da mesma base do cliente"
 			},
 			"response": []
+		},
+		{
+			"name": "Pegar prestadores",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "1",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/prestadores",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"prestadores"
+					]
+				},
+				"description": "Verificar os prestadores da mesma região do atendente, identificado pelo header userId. Ele só libera a verificação de um prestador específico, caso ele seja da mesma região do antendente."
+			},
+			"response": []
+		},
+		{
+			"name": "Registar prestadores",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "userId",
+						"value": "4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"razaoSocial\": \"Data Assistencia Tecnica Ltda\",\r\n    \"endereco\": \"Rua dos Incas, 123\",\r\n    \"email\": \"matheushdealmeida@gmail.com\",\r\n    \"telefone\": \"11 432 573 432\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/prestadores/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"prestadores",
+						"create"
+					]
+				},
+				"description": "Registra o prestador na mesma região do atendente. identificado pelo header userID"
+			},
+			"response": []
+		},
+		{
+			"name": "Apagar prestador",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "userId",
+						"value": "4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/prestadores/delete/11",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"prestadores",
+						"delete",
+						"11"
+					]
+				},
+				"description": "Apaga os prestadores informados pelo id na url, desde que eles sejam da mesma base do supervisor, cujo o header userId deve ser informado, para permitir a operação."
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}
