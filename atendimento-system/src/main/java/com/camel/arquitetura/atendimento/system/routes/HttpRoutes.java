@@ -31,6 +31,7 @@ public class HttpRoutes extends RouteBuilder {
         from("direct:hello-world")
             .setBody(constant("Bem vindo ao sistema de assistencia tecnica"));
         
+        // Rota de integracao com sistema de atendentes
         from("direct:get-atendente")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("atendentes/${body}"))
@@ -39,6 +40,7 @@ public class HttpRoutes extends RouteBuilder {
             .to("http4://" + atendenteUrl)
             .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class);
         
+        // Rotas de integracao com o sistema de prestadores
         from("direct:get-prestadores")
             .setBody(simple("${header.userId}"))
             .to("direct:get-atendente")
@@ -94,6 +96,14 @@ public class HttpRoutes extends RouteBuilder {
             .to("http4://" + prestadorUrl)
             .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
         
+        from("direct:get-prestador-by-base")
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
+            .setBody(simple(""))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+        
+        // Rotas de integracao com sistema de clientes
         from("direct:get-clientes")
             .setBody(simple("${header.userId}"))
             .to("direct:get-atendente")
@@ -149,7 +159,6 @@ public class HttpRoutes extends RouteBuilder {
             .to("http4://" + clienteUrl)
             .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class);
         
-        
         from("direct:get-cliente-by-name")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/razao-social/${body}"))
@@ -161,13 +170,6 @@ public class HttpRoutes extends RouteBuilder {
                     .setBody(constant(""))
                 .endChoice()
             .end();
-        
-        from("direct:get-prestador-by-base")
-            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
-            .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
-            .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
     }
 
 }
