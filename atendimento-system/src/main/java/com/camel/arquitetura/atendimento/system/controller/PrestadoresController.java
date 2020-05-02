@@ -9,18 +9,21 @@ import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
+import com.camel.arquitetura.atendimento.system.model.dto.CreateClienteRequestDTO;
+import com.camel.arquitetura.atendimento.system.model.dto.CreatePrestadorRequestDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
 
 @RestController
 @RequestMapping("/prestadores")
 public class PrestadoresController {
     // Só supervisor pode apagar prestadores e eles devem ser da mesma base
-    // Atendentes podem registrar prestadores de mesma região
     @Autowired
     private ProducerTemplate producerTemplate;
     
@@ -42,6 +45,22 @@ public class PrestadoresController {
             prestador = producerTemplate.requestBodyAndHeaders("direct:get-prestador-by-id", "", headers, PrestadorResponseDTO.class);
         } catch (Exception e) {
             throw new Exception("Prestador não pertence à base do atendente");
+        }
+        
+        return prestador;
+    }
+    
+    @PostMapping("/create")
+    public PrestadorResponseDTO createCliente(@RequestBody CreatePrestadorRequestDTO dto, 
+            @RequestHeader Long userId) throws Exception {
+        PrestadorResponseDTO prestador = null;
+        
+        try {
+            // Registra o prestador na mesma região do atendente
+            prestador = producerTemplate.requestBodyAndHeader("direct:create-prestador", dto, 
+                    "userId", userId, PrestadorResponseDTO.class);
+        } catch (Exception e) {
+            throw new Exception("Somente supervisores e analistas podem registrar prestadores");
         }
         
         return prestador;

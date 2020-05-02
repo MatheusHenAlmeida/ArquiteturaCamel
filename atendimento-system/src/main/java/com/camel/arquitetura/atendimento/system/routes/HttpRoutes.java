@@ -11,6 +11,7 @@ import com.camel.arquitetura.atendimento.system.model.dto.AtendenteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
 import com.camel.arquitetura.atendimento.system.processors.BuildCreateClienteProcessor;
+import com.camel.arquitetura.atendimento.system.processors.BuildCreatePrestadorProcessor;
 import com.camel.arquitetura.atendimento.system.processors.FilterClientesByBaseProcessor;
 import com.camel.arquitetura.atendimento.system.processors.FilterPrestadoresByBaseProcessor;
 
@@ -66,6 +67,19 @@ public class HttpRoutes extends RouteBuilder {
                     .throwException(new Exception(" Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
+        
+        from("direct:create-prestador")
+            .setProperty("dto", simple("${body}"))
+            .setBody(simple("${header.userId}"))
+            .to("direct:get-atendente")
+            .setHeader("user", simple("${body}"))
+            .to("direct:supervisor-analista-credentials")
+            .process(new BuildCreatePrestadorProcessor())
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+            .setHeader(Exchange.HTTP_PATH, simple("prestadores/create"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .to("http4://" + prestadorUrl)
+            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
         
         from("direct:get-clientes")
             .setBody(simple("${header.userId}"))
