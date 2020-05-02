@@ -1,5 +1,9 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.camel.arquitetura.atendimento.system.model.dto.AtendenteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.ClienteResponseDTO;
 import com.camel.arquitetura.atendimento.system.model.dto.PrestadorResponseDTO;
+import com.camel.arquitetura.atendimento.system.processors.FilterClientesByBaseProcessor;
 
 @Component
 public class HttpRoutes extends RouteBuilder {
@@ -34,6 +39,35 @@ public class HttpRoutes extends RouteBuilder {
             .setBody(simple(""))
             .to("http4://" + atendenteUrl)
             .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class);
+        
+        from("direct:get-clientes")
+            .setBody(simple("${header.userId}"))
+            .to("direct:get-atendente")
+            .setProperty("atendente", simple("${body}"))
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("clientes"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .setBody(simple(""))
+            .to("http4://" + clienteUrl)
+            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO[].class)
+            .process(new FilterClientesByBaseProcessor());
+        
+        from("direct:get-cliente-by-id")
+            .setBody(simple("${header.userId}"))
+            .setProperty("ordemId", simple("${header.id}"))
+            .to("direct:get-atendente")
+            .setProperty("atendente", simple("${body}"))
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
+            .setHeader(Exchange.HTTP_PATH, simple("clientes/${property.ordemId}"))
+            .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
+            .setBody(simple(""))
+            .to("http4://" + clienteUrl)
+            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .choice()
+                .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
+                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                .endChoice()
+            .end();
         
         from("direct:get-cliente-by-name")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
