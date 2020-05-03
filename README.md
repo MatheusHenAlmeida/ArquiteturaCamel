@@ -43,3 +43,18 @@ Essas operações do atendimento-system respeitam o seguinte conjunto de regras 
 3. Todos os atendentes podem ver os clientes e prestadores registrados em sua base.
 4. Todos os atendentes podem criar ordens de serviço (OS) para clientes de sua base e o prestador designado para o atendimento, será da mesma base do cliente.
 5. Somente supervisores e analistas podem fechar as OS's.
+
+### __Vantagens__
+
+Com essa abordagem, têm-se alguns ganhos no trabalho de integrar os diversos sistemas:
+
+- Rotas mais simples e fácis de prestar suporte
+- Com exchanges diferentes pa ra cada chamada de rota, não temos mais o problema de ficar com uma imensão de dados armazenados nos headers e nas properties
+- Tira-se a responsabilidade da lógica de negócio da rota
+- Melhor aproveitamento dos componentes do Camel
+
+### __Observações__
+
+Dentro da pasta PostmanScripts, há scripts que podem ser importados no postman com testes de todos os endpoints de todos o sistemas desta POC. A exportação foi feita para versões do postman, a partir do v2.1.
+
+Os tratamentos de erros e algumas verificações de variáveis nulas foram implementados de uma forma muito simplória, visto que o foco desta POC era apresentar uma forma de utilizar as rotas do Camel dentro do código Java, para facilitar a vida do desenvolvedor, evitando a criação de rotas que fizessem tudo e, por isso, ficassem muito complexas e de difícil manutenção.
