@@ -30,6 +30,15 @@ Para poder acessar o banco de dados como root user, basta usar o script abaixo, 
 
 Onde o sistema pode ser: atendente, prestador, cliente e ordem-servico.
 
+Depois de configurar e subir todos os containeres, basta importar os projetos abaixo para sua IDE e rodar todos:
+
+- atendente-server
+- cliente-server
+- prestador-server
+- atendimento-system
+
+Todas as configurações de portas e acessos aos db's já estão definidas. Não nenhuma necessidade de se configurar isso para rodar e testar a POC.
+
 ### __Descrição do sistema__
 
 Basicamente há 3 sistemas, o atendente-server, cliente-server e o prestador-server, em que cada um possue a responsabilidade de gerenciar os dados de seu escopo (atendente-server cuida dos atendentes, suas lógicas próprias e nada mais, por exemplo).
@@ -58,3 +67,11 @@ Com essa abordagem, têm-se alguns ganhos no trabalho de integrar os diversos si
 Dentro da pasta PostmanScripts, há scripts que podem ser importados no postman com testes de todos os endpoints de todos o sistemas desta POC. A exportação foi feita para versões do postman, a partir do v2.1.
 
 Os tratamentos de erros e algumas verificações de variáveis nulas foram implementados de uma forma muito simplória, visto que o foco desta POC era apresentar uma forma de utilizar as rotas do Camel dentro do código Java, para facilitar a vida do desenvolvedor, evitando a criação de rotas que fizessem tudo e, por isso, ficassem muito complexas e de difícil manutenção.
+
+Todas as configurações de portas dos sistemas, url's dos bancos de dados, etc. Estão nos arquivos application.properties de cada aplicação.
+
+Para alterar as configurações dos bancos de dados, em cada projeto há uma pasta db com o seguinte arquivo:
+
+    CreateDatabase.sql
+
+Onde pode-se configurar as tabelas e os dados mockados do db. E dentro do projeto, há um Dockerfile onde pode-se configurar a imagem base do Mysql e algumas variáveis de ambiente.
