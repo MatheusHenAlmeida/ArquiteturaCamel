@@ -75,3 +75,11 @@ Para alterar as configurações dos bancos de dados, em cada projeto há uma pas
     CreateDatabase.sql
 
 Onde pode-se configurar as tabelas e os dados mockados do db. E dentro do projeto, há um Dockerfile onde pode-se configurar a imagem base do Mysql e algumas variáveis de ambiente.
+
+## TODO
+
+1. Montar mensagens de erros quando houver exceções
+2. Criar camada de service, para englobar chamadas de rotas e algumas lógicas de negócio
+3. Realizar testes unitários
+4. Tentar implementar lógica pra gerar pdf da ordem de serviço (usar componente do apache camel)
+5. Tentar enviar ordem de serviço por email (usar componente do apache camel)
