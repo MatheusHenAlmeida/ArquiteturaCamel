@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.camel.arquitetura.atendimento.system.exceptions.AtendenteNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.PrestadorNotFoundException;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,23 +42,28 @@ public class AtendimentoController {
     
     @PostMapping("/create")
     public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Exception {
-        AtendenteResponseDTO atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
-        ClienteResponseDTO cliente = new ClienteResponseDTO();        
+        ClienteResponseDTO cliente = new ClienteResponseDTO();
+        AtendenteResponseDTO atendente = new AtendenteResponseDTO();
+
+        try {
+            atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw new AtendenteNotFoundException("Não foi encontrado o antendente");
+        }
         try {
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
-            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(), 
+            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),
                     "base", atendente.getBase(), ClienteResponseDTO.class);
         } catch (CamelExecutionException e) {
-            throw new Exception("Só um atendente da mesma base do cliente pode abrir uma OS");
+            throw new AtendenteNotFoundException("Só um atendente da mesma base do cliente pode abrir uma OS");
         }
         
         PrestadorResponseDTO prestador = new PrestadorResponseDTO();
         
         try {
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
-            System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
-            throw new Exception("Não há prestador na região");
+            throw new PrestadorNotFoundException("Não há prestador na região");
         }
         
         Map<String, Object> headers = new HashMap<String, Object>();
