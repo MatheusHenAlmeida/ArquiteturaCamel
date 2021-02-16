@@ -37,9 +37,7 @@ public class AtendimentoController {
 
     @GetMapping("/hello-world")
     public String helloWorld() {
-        String response = template.requestBody("direct:hello-world", "", String.class);
-        
-        return response;
+        return template.requestBody("direct:hello-world", "", String.class);
     }
     
     @PostMapping("/create")
@@ -52,8 +50,9 @@ public class AtendimentoController {
             atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
 
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
-            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),
-                    "base", atendente.getBase(), ClienteResponseDTO.class);
+            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name",
+                    createOrdemServicoDTO.getNomeCliente(), "base", atendente.getBase(),
+                    ClienteResponseDTO.class);
 
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
         } catch (CamelExecutionException e) {
@@ -103,20 +102,20 @@ public class AtendimentoController {
     }
     
     @GetMapping("{id}/close")
-    public OrdemServico closeOrdemServico(@RequestHeader Long userId, @PathVariable Long id) throws Exception {
-        if (userId == null) throw new Exception("User-Id deve ser fornecido");
+    public OrdemServico closeOrdemServico(@RequestHeader Long userId, @PathVariable Long id) throws Throwable {
+        if (userId == null) throw new AtendenteNotFoundException("User-Id deve ser fornecido");
         AtendenteResponseDTO atendente = null;
         try {
             atendente = template.requestBody("direct:get-atendente", userId.toString(), AtendenteResponseDTO.class);
-        } catch (Exception e) {
-            throw new Exception("Atendente não encontrado");
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         }
         
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, Object> headers = new HashMap();
         headers.put("user", atendente);
         headers.put("id", id);
         
-        OrdemServico ordemServico = null;
+        OrdemServico ordemServico;
         try {
             ordemServico = template.requestBodyAndHeaders("direct:update-ordem-by-id", "", headers, OrdemServico.class);
         } catch (Exception e) {
