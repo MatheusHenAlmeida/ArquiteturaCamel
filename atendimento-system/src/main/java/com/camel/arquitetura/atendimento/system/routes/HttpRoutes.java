@@ -159,6 +159,9 @@ public class HttpRoutes extends RouteBuilder {
                 .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
             .end()
             .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new ClientNotFoundException("Cliente não encontrado"))
+                .endChoice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
                     .throwException(new OutsideClientException("Cliente não pertence à base do atendente"))
                 .endChoice()
@@ -192,8 +195,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/delete/${property.clienteId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class);
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end();
         
         from("direct:get-cliente-by-name")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))

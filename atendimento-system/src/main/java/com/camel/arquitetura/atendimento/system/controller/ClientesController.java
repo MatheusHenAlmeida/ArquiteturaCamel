@@ -79,15 +79,17 @@ public class ClientesController {
     }
     
     @DeleteMapping("/delete/{id}")
-    public ClienteResponseDTO removeCliente(@PathVariable Long id, @RequestHeader Long userId) throws Exception {
+    public ClienteResponseDTO removeCliente(@PathVariable Long id, @RequestHeader Long userId) throws Throwable {
         ClienteResponseDTO cliente = null;
         
         try {
             // Apaga o cliente se o atendente for um supervisor da mesma região
             cliente = producerTemplate.requestBodyAndHeader("direct:remove-cliente", id, 
                     "userId", userId, ClienteResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Somente supervisores podem apagar clientes");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         return cliente;

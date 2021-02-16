@@ -55,7 +55,7 @@ public class SQLRoutes extends RouteBuilder {
             .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
             .choice()
                 .when(simple("${header.user.getCargo()} != ${header.supervisor}"))
-                    .throwException(new Exception())
+                    .throwException(new CredentialsInvalidException("Somente supervisores podem apagar clientes"))
                 .endChoice()
             .end();
         
