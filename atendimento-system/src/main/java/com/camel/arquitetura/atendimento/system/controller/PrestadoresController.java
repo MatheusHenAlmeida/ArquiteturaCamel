@@ -45,7 +45,7 @@ public class PrestadoresController {
     }
     
     @GetMapping("/{id}")
-    public PrestadorResponseDTO getById(@RequestHeader Long userId, @PathVariable Long id) throws Exception {
+    public PrestadorResponseDTO getById(@RequestHeader Long userId, @PathVariable Long id) throws Throwable {
         Map<String, Object> headers = new HashMap<String, Object>();
         headers.put("userId", userId);
         headers.put("id", id);
@@ -53,10 +53,12 @@ public class PrestadoresController {
         
         try {
             prestador = producerTemplate.requestBodyAndHeaders("direct:get-prestador-by-id", "", headers, PrestadorResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Prestador não pertence à base do atendente");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
-        
+
         return prestador;
     }
     

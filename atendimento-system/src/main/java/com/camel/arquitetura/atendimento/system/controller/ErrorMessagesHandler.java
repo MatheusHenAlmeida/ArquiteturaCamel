@@ -42,6 +42,13 @@ public class ErrorMessagesHandler {
         return new ResponseEntity(errorMessageDTO, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(OutsideProviderException.class)
+    public ResponseEntity<ErrorMessageDTO> prestadorNaoEdaBaseAtendente(OutsideProviderException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, PRESTADOR_NOT_FOUND_IN_ATENDENTE_AREA);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(CredentialsInvalidException.class)
     public ResponseEntity<ErrorMessageDTO> credenciaisInvalidas(CredentialsInvalidException ex) {
         ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, CREDENTIAL_INVALID);
