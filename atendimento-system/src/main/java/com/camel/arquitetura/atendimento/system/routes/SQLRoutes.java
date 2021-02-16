@@ -1,5 +1,7 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
+import com.camel.arquitetura.atendimento.system.exceptions.CredentialsInvalidException;
+import com.camel.arquitetura.atendimento.system.exceptions.DbErrorConnectionException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,12 @@ public class SQLRoutes extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         from("direct:get-ordens-servico")
-            .to("sql:SELECT * FROM ordem_servico")
+            .doTry()
+                .to("sql:SELECT * FROM ordem_servico")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .marshal().json(JsonLibrary.Gson);
         
@@ -28,7 +35,12 @@ public class SQLRoutes extends RouteBuilder {
         
         from("direct:get-ordem-by-id")
             // :#id serve se houver no header e usando componente sql
-            .to("sql:SELECT * FROM ordem_servico WHERE id = :#id")
+            .doTry()
+                .to("sql:SELECT * FROM ordem_servico WHERE id = :#id")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .process(new GetFirstOrdemServicoProcessor())
             .marshal().json(JsonLibrary.Gson);
@@ -36,7 +48,12 @@ public class SQLRoutes extends RouteBuilder {
         from("direct:update-ordem-by-id")
             .to("direct:supervisor-analista-credentials")
             .setProperty("userId", simple("${header.id}"))
-            .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
+            .doTry()
+                .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .to("direct:get-ordem-by-id")
             .unmarshal().json(JsonLibrary.Gson, OrdemServico.class);
 
@@ -46,7 +63,7 @@ public class SQLRoutes extends RouteBuilder {
             .choice()
                 .when(simple("${header.user.getCargo()} != ${header.supervisor} and "
                         + "${header.user.getCargo()} != ${header.analista}"))
-                    .throwException(new Exception())
+                    .throwException(new CredentialsInvalidException("O usuário precisa ser um analista ou supervisor para esta operação"))
                 .endChoice()
             .end();
         
@@ -54,7 +71,7 @@ public class SQLRoutes extends RouteBuilder {
             .setHeader("supervisor",constant(Cargos.SUPERVISOR)) 
             .choice()
                 .when(simple("${header.user.getCargo()} != ${header.supervisor}"))
-                    .throwException(new Exception())
+                    .throwException(new CredentialsInvalidException("Somente supervisores podem apagar clientes"))
                 .endChoice()
             .end();
         
@@ -62,14 +79,19 @@ public class SQLRoutes extends RouteBuilder {
             .log("Cliente: ${header.cliente.getRazaoSocial()} - "
                     + "Prestador: ${header.prestador.getRazaoSocial()} - "
                     + "Descricao: ${header.descricao}")
-            .toD("sql:INSERT INTO "
+            .doTry()
+                .toD("sql:INSERT INTO "
                     + "ordem_servico(prestador_nome, prestador_email, prestador_telefone, cliente_nome, "
                     + "cliente_endereco, cliente_email, cliente_telefone, descricao) "
                     + "VALUES ('${header.prestador.getRazaoSocial()}', '${header.prestador.getEmail()}', "
                     + "'${header.prestador.getTelefone()}', '${header.cliente.getRazaoSocial()}', "
                     + "'${header.cliente.getEndereco()}', '${header.cliente.getEmail()}',"
                     + "'${header.cliente.getTelefone()}', '${header.descricao}')")
-            .to("sql:SELECT * FROM ordem_servico WHERE id = LAST_INSERT_ID()")
+                .to("sql:SELECT * FROM ordem_servico WHERE id = LAST_INSERT_ID()")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .process(new GetFirstOrdemServicoProcessor())
             .marshal().json(JsonLibrary.Gson);

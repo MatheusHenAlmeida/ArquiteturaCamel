@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.camel.arquitetura.atendimento.system.exceptions.UnknownException;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,14 +30,22 @@ public class PrestadoresController {
     private ProducerTemplate producerTemplate;
     
     @GetMapping()
-    public List<PrestadorResponseDTO> getAll(@RequestHeader Long userId) {
-        PrestadorResponseDTO[] prestadores = producerTemplate.requestBodyAndHeader("direct:get-prestadores", "", 
-                "userId", userId, PrestadorResponseDTO[].class);
+    public List<PrestadorResponseDTO> getAll(@RequestHeader Long userId) throws Throwable {
+        PrestadorResponseDTO[] prestadores;
+        try {
+            prestadores = producerTemplate.requestBodyAndHeader("direct:get-prestadores", "",
+                    "userId", userId, PrestadorResponseDTO[].class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         return Arrays.asList(prestadores);
     }
     
     @GetMapping("/{id}")
-    public PrestadorResponseDTO getById(@RequestHeader Long userId, @PathVariable Long id) throws Exception {
+    public PrestadorResponseDTO getById(@RequestHeader Long userId, @PathVariable Long id) throws Throwable {
         Map<String, Object> headers = new HashMap<String, Object>();
         headers.put("userId", userId);
         headers.put("id", id);
@@ -43,39 +53,45 @@ public class PrestadoresController {
         
         try {
             prestador = producerTemplate.requestBodyAndHeaders("direct:get-prestador-by-id", "", headers, PrestadorResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Prestador não pertence à base do atendente");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
-        
+
         return prestador;
     }
     
     @PostMapping("/create")
     public PrestadorResponseDTO createCliente(@RequestBody CreatePrestadorRequestDTO dto, 
-            @RequestHeader Long userId) throws Exception {
+            @RequestHeader Long userId) throws Throwable {
         PrestadorResponseDTO prestador = null;
         
         try {
             // Registra o prestador na mesma região do atendente
             prestador = producerTemplate.requestBodyAndHeader("direct:create-prestador", dto, 
                     "userId", userId, PrestadorResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Somente supervisores e analistas podem registrar prestadores");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         return prestador;
     }
     
     @DeleteMapping("/delete/{id}")
-    public PrestadorResponseDTO removeCliente(@PathVariable Long id, @RequestHeader Long userId) throws Exception {
+    public PrestadorResponseDTO removeCliente(@PathVariable Long id, @RequestHeader Long userId) throws Throwable {
         PrestadorResponseDTO prestador = null;
         
         try {
             // Apaga o cliente se o atendente for um supervisor da mesma região
             prestador = producerTemplate.requestBodyAndHeader("direct:remove-prestador", id, 
                     "userId", userId, PrestadorResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Somente supervisores podem apagar prestadores");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         return prestador;

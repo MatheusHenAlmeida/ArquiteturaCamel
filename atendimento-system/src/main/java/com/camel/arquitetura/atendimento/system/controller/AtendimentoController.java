@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.camel.arquitetura.atendimento.system.exceptions.AtendenteNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.OutsideClientException;
+import com.camel.arquitetura.atendimento.system.exceptions.PrestadorNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.UnknownException;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,96 +34,130 @@ import com.google.gson.reflect.TypeToken;
 public class AtendimentoController {
     @Autowired
     private ProducerTemplate template;
-    
+
     @GetMapping("/hello-world")
     public String helloWorld() {
-        String response = template.requestBody("direct:hello-world", "", String.class);
-        
-        return response;
+        return template.requestBody("direct:hello-world", "", String.class);
     }
     
     @PostMapping("/create")
-    public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Exception {
-        AtendenteResponseDTO atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
-        ClienteResponseDTO cliente = new ClienteResponseDTO();        
+    public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Throwable {
+        ClienteResponseDTO cliente;
+        AtendenteResponseDTO atendente;
+        PrestadorResponseDTO prestador;
+
         try {
+            atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
+
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
-            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(), 
-                    "base", atendente.getBase(), ClienteResponseDTO.class);
-        } catch (CamelExecutionException e) {
-            throw new Exception("Só um atendente da mesma base do cliente pode abrir uma OS");
-        }
-        
-        PrestadorResponseDTO prestador = new PrestadorResponseDTO();
-        
-        try {
+            cliente = template.requestBodyAndHeader("direct:get-cliente-by-name",
+                    createOrdemServicoDTO.getNomeCliente(), "base", atendente.getBase(),
+                    ClienteResponseDTO.class);
+
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
-            System.out.println(prestador.getRazaoSocial());
         } catch (CamelExecutionException e) {
-            throw new Exception("Não há prestador na região");
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
-        
+
         Map<String, Object> headers = new HashMap<String, Object>();
         headers.put("cliente", cliente);
         headers.put("prestador", prestador);
         headers.put("descricao", createOrdemServicoDTO.getDescricao());
         
-        String os = template.requestBodyAndHeaders("direct:insert-ordem-servico", "", headers, String.class);
-        
+        String os;
+
+        try {
+            os = template.requestBodyAndHeaders("direct:insert-ordem-servico", "", headers, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         return new Gson().fromJson(os, OrdemServico.class);
     }
     
     @GetMapping
-    public List<OrdemServico> getAll() {
-        String response = template.requestBody("direct:get-ordens-servico", "", String.class);
+    public List<OrdemServico> getAll() throws Throwable {
+        String response;
+        try {
+            response = template.requestBody("direct:get-ordens-servico", "", String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
         List<OrdemServico> list = new Gson().fromJson(response, listType);
         return list;
     }
     
     @GetMapping("/opened")
-    public List<OrdemServico> getAllOpened() {
+    public List<OrdemServico> getAllOpened() throws Throwable {
         return filterByStatus(false);
     }
     
     @GetMapping("/closed")
-    public List<OrdemServico> getAllClosed() {
+    public List<OrdemServico> getAllClosed() throws Throwable {
         return filterByStatus(true);
     }
     
-    private List<OrdemServico> filterByStatus(boolean status) {
-        String response = template.requestBodyAndHeader("direct:get-ordens-by-status", "", "os-status", status, String.class);
+    private List<OrdemServico> filterByStatus(boolean status) throws Throwable {
+        String response;
+        try {
+            response = template.requestBodyAndHeader("direct:get-ordens-by-status", "", "os-status", status, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
         List<OrdemServico> list = new Gson().fromJson(response, listType);
         return list;
     }
     
     @GetMapping("/{id}")
-    public OrdemServico getById(@PathVariable Long id) {
-        String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+    public OrdemServico getById(@PathVariable Long id) throws Throwable {
+        String response;
+        try {
+            response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         OrdemServico os = new Gson().fromJson(response, OrdemServico.class);
         return os;
     }
     
     @GetMapping("{id}/close")
-    public OrdemServico closeOrdemServico(@RequestHeader Long userId, @PathVariable Long id) throws Exception {
-        if (userId == null) throw new Exception("User-Id deve ser fornecido");
+    public OrdemServico closeOrdemServico(@RequestHeader Long userId, @PathVariable Long id) throws Throwable {
+        if (userId == null) throw new AtendenteNotFoundException("User-Id deve ser fornecido");
         AtendenteResponseDTO atendente = null;
         try {
             atendente = template.requestBody("direct:get-atendente", userId.toString(), AtendenteResponseDTO.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Atendente não encontrado");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, Object> headers = new HashMap();
         headers.put("user", atendente);
         headers.put("id", id);
         
-        OrdemServico ordemServico = null;
+        OrdemServico ordemServico;
         try {
             ordemServico = template.requestBodyAndHeaders("direct:update-ordem-by-id", "", headers, OrdemServico.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Não foi possível fechar a ordem de serviço");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         return ordemServico;

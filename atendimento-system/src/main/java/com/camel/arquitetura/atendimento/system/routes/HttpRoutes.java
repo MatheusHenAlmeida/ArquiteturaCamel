@@ -1,5 +1,6 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
+import com.camel.arquitetura.atendimento.system.exceptions.*;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -37,8 +38,18 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("atendentes/${body}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + atendenteUrl)
-            .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class);
+            .doTry()
+                .to("http4://" + atendenteUrl)
+                .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de atendentes"))
+            .end()
+            .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new AtendenteNotFoundException("Não foi encontrado o antendente"))
+                .endChoice()
+            .end();
         
         // Rotas de integracao com o sistema de prestadores
         from("direct:get-prestadores")
@@ -49,8 +60,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("prestadores"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO[].class)
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO[].class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end()
             .process(new FilterPrestadoresByBaseProcessor());
         
         from("direct:get-prestador-by-id")
@@ -62,11 +78,16 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/${property.ordemId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end()
             .choice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
-                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                    .throwException(new OutsideProviderException("Prestador não pertence à base do atendente"))
                 .endChoice()
             .end();
         
@@ -80,8 +101,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/create"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end();
         
         from("direct:remove-prestador")
             .setProperty("clienteId", simple("${body}"))
@@ -93,15 +119,30 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/delete/${property.clienteId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end();
         
         from("direct:get-prestador-by-base")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
             .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end()
+            .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new PrestadorNotFoundException("Não existe prestador nesta base"))
+                .endChoice()
+            .end();
         
         // Rotas de integracao com sistema de clientes
         from("direct:get-clientes")
@@ -112,8 +153,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("clientes"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
+            .doTry()
             .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO[].class)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO[].class)
+                .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end()
             .process(new FilterClientesByBaseProcessor());
         
         from("direct:get-cliente-by-id")
@@ -125,11 +171,19 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("clientes/${property.ordemId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end()
             .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new ClientNotFoundException("Cliente não encontrado"))
+                .endChoice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
-                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                    .throwException(new OutsideClientException("Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
         
@@ -143,8 +197,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/create"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class);
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end();
         
         from("direct:remove-cliente")
             .setProperty("clienteId", simple("${body}"))
@@ -156,18 +215,31 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/delete/${property.clienteId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class);
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end();
         
         from("direct:get-cliente-by-name")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/razao-social/${body}"))
             .setBody(simple(""))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end()
             .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new ClientNotFoundException("Não foi possível encontrar o cliente desejado"))
+                .endChoice()
                 .when(simple("${header.base} != ${body.getBase()}"))
-                    .setBody(constant(""))
+                    .throwException(new OutsideClientException("Só um atendente da mesma base do cliente pode abrir uma OS"))
                 .endChoice()
             .end();
     }
