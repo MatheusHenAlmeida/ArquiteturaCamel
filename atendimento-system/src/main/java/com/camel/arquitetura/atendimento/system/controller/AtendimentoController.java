@@ -49,8 +49,6 @@ public class AtendimentoController {
 
         try {
             atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
-
-            if (atendente == null) throw new AtendenteNotFoundException("Não foi encontrado o antendente");
         } catch (CamelExecutionException e) {
             throw e.getCause();
         }

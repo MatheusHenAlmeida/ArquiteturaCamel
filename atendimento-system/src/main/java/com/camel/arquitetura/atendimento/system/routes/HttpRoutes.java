@@ -44,6 +44,11 @@ public class HttpRoutes extends RouteBuilder {
             .endDoTry()
             .doCatch(Exception.class)
                 .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de atendentes"))
+            .end()
+            .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new AtendenteNotFoundException("Não foi encontrado o antendente"))
+                .endChoice()
             .end();
         
         // Rotas de integracao com o sistema de prestadores
@@ -169,8 +174,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("clientes/razao-social/${body}"))
             .setBody(simple(""))
-            .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .doTry()
+                .to("http4://" + clienteUrl)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end()
             .choice()
                 .when(simple("${body} == null"))
                     .throwException(new ClientNotFoundException("Não foi possível encontrar o cliente desejado"))
