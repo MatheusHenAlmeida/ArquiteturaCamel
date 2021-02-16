@@ -15,9 +15,9 @@ SET character_set_connection = utf8;
 SET character_set_results = utf8;
 SET collation_connection = utf8_general_ci;
 
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Garoa Tech ltda', 'GRANDE_SP', 'Av. Brasil, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Baixada Geek ltda', 'LITORAL', 'Av. Peru, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('SysSuporte ltda', 'GRANDE_CAMPINAS', 'Av. Lisboa, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Suporte AraraTECH ltda', 'REGIAO_ARARAQUARA', 'Av. Lisboa, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('SoftBauru ltda', 'REGIAO_BAURU', 'Av. Lisboa, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
-INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Santo Tech ltda', 'VALE_PARAIBA', 'Av. Lisboa, 123', 'matheushdealmeida@gmail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Garoa Tech ltda', 'GRANDE_SP', 'Av. Brasil, 123', 'garoa_tech@mail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Baixada Geek ltda', 'LITORAL', 'Av. Peru, 123', 'baixada_geek@mail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('SysSuporte ltda', 'GRANDE_CAMPINAS', 'Av. Lisboa, 123', 'sys@mail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Suporte AraraTECH ltda', 'REGIAO_ARARAQUARA', 'Av. Lisboa, 123', 'arara_tech@mail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('SoftBauru ltda', 'REGIAO_BAURU', 'Av. Lisboa, 123', 'softbauru@mail.com', '11 432 573 432');
+INSERT INTO prestador(razao_social, base, endereco, email, telefone) VALUES ('Santo Tech ltda', 'VALE_PARAIBA', 'Av. Lisboa, 123', 'santotech@mail.com', '11 432 573 432');
