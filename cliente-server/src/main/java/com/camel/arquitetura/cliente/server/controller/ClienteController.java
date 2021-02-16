@@ -39,13 +39,16 @@ public class ClienteController {
     
     @GetMapping("/razao-social/{name}")
     public Cliente getByName(@PathVariable("name") String razaoSocial) {
-        Cliente cliente = clienteRepository.findByRazaoSocial(razaoSocial).get(0);
-        return cliente;
+        List<Cliente> clientes = clienteRepository.findByRazaoSocial(razaoSocial);
+
+        if (clientes.size() > 0)
+            return clientes.get(0);
+        else
+            return null;
     }
         
     @GetMapping("/{id}")
     public Cliente getById(@PathVariable Long id) {
-        List<Cliente> clientes = new ArrayList<Cliente>();
         Optional<Cliente> cliente = clienteRepository.findById(id);
         
         if (cliente.isPresent())
