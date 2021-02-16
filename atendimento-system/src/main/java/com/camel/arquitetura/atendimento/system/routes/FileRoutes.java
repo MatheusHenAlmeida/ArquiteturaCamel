@@ -4,11 +4,12 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PDFRoutes extends RouteBuilder {
+public class FileRoutes extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("direct:gera-pdf")
+        from("direct:gera-txt")
+                .setProperty("id", simple("${body.getId()}"))
                 .to("velocity://templates/ordem.vm")
-                .to("file:os?");
+                .toD("file:os?fileName=ordem-servico-${header.id}.txt");
     }
 }

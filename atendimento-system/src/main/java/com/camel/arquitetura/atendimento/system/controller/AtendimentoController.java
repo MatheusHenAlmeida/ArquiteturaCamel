@@ -78,7 +78,7 @@ public class AtendimentoController {
 
         OrdemServico ordemServico = new Gson().fromJson(os, OrdemServico.class);
 
-        template.sendBody("direct:gera-pdf", ordemServico);
+        template.sendBody("direct:gera-txt", ordemServico);
 
         return ordemServico;
     }
