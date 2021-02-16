@@ -76,7 +76,11 @@ public class AtendimentoController {
             throw new UnknownException("Ocorreu um erro inesperado");
         }
 
-        return new Gson().fromJson(os, OrdemServico.class);
+        OrdemServico ordemServico = new Gson().fromJson(os, OrdemServico.class);
+
+        template.sendBody("direct:gera-txt", ordemServico);
+
+        return ordemServico;
     }
     
     @GetMapping
