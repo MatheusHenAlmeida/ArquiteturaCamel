@@ -101,8 +101,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/create"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end();
         
         from("direct:remove-prestador")
             .setProperty("clienteId", simple("${body}"))
@@ -114,8 +119,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/delete/${property.clienteId}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end();
         
         from("direct:get-prestador-by-base")
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
