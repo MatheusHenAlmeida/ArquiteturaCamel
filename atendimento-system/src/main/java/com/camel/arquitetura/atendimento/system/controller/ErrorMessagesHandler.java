@@ -39,7 +39,14 @@ public class ErrorMessagesHandler {
     public ResponseEntity<ErrorMessageDTO> clienteNaoEdaBaseAtendente(OutsideClientException ex) {
         ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, CLIENT_NOT_FOUND_IN_ATENDENTE_AREA);
 
-        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+        return new ResponseEntity(errorMessageDTO, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(CredentialsInvalidException.class)
+    public ResponseEntity<ErrorMessageDTO> credenciaisInvalidas(CredentialsInvalidException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, CREDENTIAL_INVALID);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ServerNotFoundException.class)
@@ -49,12 +56,12 @@ public class ErrorMessagesHandler {
         return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
     }
 
-//    @ExceptionHandler(UnknownException.class)
-//    public ResponseEntity<ErrorMessageDTO> prestadorNaoEncontrado(UnknownException ex) {
-//        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, UNKNOWN_ERROR);
-//
-//        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
-//    }
+    @ExceptionHandler(UnknownException.class)
+    public ResponseEntity<ErrorMessageDTO> prestadorNaoEncontrado(UnknownException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, UNKNOWN_ERROR);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     private ErrorMessageDTO buildErrorMessage(RuntimeException ex, String errorCode) {
         ErrorMessageDTO errorMessageDTO = new ErrorMessageDTO();

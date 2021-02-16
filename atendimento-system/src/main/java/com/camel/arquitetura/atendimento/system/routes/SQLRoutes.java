@@ -1,5 +1,6 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
+import com.camel.arquitetura.atendimento.system.exceptions.CredentialsInvalidException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,7 @@ public class SQLRoutes extends RouteBuilder {
             .choice()
                 .when(simple("${header.user.getCargo()} != ${header.supervisor} and "
                         + "${header.user.getCargo()} != ${header.analista}"))
-                    .throwException(new Exception())
+                    .throwException(new CredentialsInvalidException("O usuário precisa ser um analista ou supervisor para esta operação"))
                 .endChoice()
             .end();
         
