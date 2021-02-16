@@ -1,0 +1,10 @@
+OS: ${body.getId()}
+
+Cliente: ${body.getClienteNome()}
+Contato: ${body.getClienteTelefone()} / ${body.getClienteEmail()}
+Endereço: ${body.getClienteEndereco()}
+
+Descrição: ${body.getDescricao()}
+
+Prestador: ${body.getPrestadorNome()}
+Contato: ${body.getPrestadorTelefone()} / ${body.getPrestadorEmail()}
