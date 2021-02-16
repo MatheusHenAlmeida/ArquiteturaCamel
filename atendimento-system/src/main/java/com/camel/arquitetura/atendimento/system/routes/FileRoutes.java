@@ -9,7 +9,6 @@ public class PDFRoutes extends RouteBuilder {
     public void configure() throws Exception {
         from("direct:gera-pdf")
                 .to("velocity://templates/ordem.vm")
-            .log("${body}")
-        ;
+                .to("file:os?");
     }
 }
