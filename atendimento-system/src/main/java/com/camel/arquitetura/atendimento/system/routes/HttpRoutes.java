@@ -1,5 +1,6 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
+import com.camel.arquitetura.atendimento.system.exceptions.*;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -37,8 +38,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("atendentes/${body}"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + atendenteUrl)
-            .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class);
+            .doTry()
+                .to("http4://" + atendenteUrl)
+                .unmarshal().json(JsonLibrary.Gson, AtendenteResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de atendentes"))
+            .end();
         
         // Rotas de integracao com o sistema de prestadores
         from("direct:get-prestadores")
@@ -66,7 +72,7 @@ public class HttpRoutes extends RouteBuilder {
             .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
             .choice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
-                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                    .throwException(new OutsideClientException(" Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
         
@@ -129,7 +135,7 @@ public class HttpRoutes extends RouteBuilder {
             .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
             .choice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
-                    .throwException(new Exception(" Cliente não pertence à base do atendente"))
+                    .throwException(new OutsideClientException("Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
         

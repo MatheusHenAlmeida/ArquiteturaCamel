@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.camel.arquitetura.atendimento.system.exceptions.AtendenteNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.OutsideClientException;
 import com.camel.arquitetura.atendimento.system.exceptions.PrestadorNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.UnknownException;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ import com.google.gson.reflect.TypeToken;
 public class AtendimentoController {
     @Autowired
     private ProducerTemplate template;
-    
+
     @GetMapping("/hello-world")
     public String helloWorld() {
         String response = template.requestBody("direct:hello-world", "", String.class);
@@ -41,15 +43,18 @@ public class AtendimentoController {
     }
     
     @PostMapping("/create")
-    public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Exception {
-        ClienteResponseDTO cliente = new ClienteResponseDTO();
-        AtendenteResponseDTO atendente = new AtendenteResponseDTO();
+    public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Throwable {
+        ClienteResponseDTO cliente;
+        AtendenteResponseDTO atendente;
 
         try {
             atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
+
+            if (atendente == null) throw new AtendenteNotFoundException("Não foi encontrado o antendente");
         } catch (CamelExecutionException e) {
-            throw new AtendenteNotFoundException("Não foi encontrado o antendente");
+            throw e.getCause();
         }
+
         try {
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),

@@ -1,7 +1,6 @@
 package com.camel.arquitetura.atendimento.system.controller;
 
-import com.camel.arquitetura.atendimento.system.exceptions.AtendenteNotFoundException;
-import com.camel.arquitetura.atendimento.system.exceptions.PrestadorNotFoundException;
+import com.camel.arquitetura.atendimento.system.exceptions.*;
 import com.camel.arquitetura.atendimento.system.model.dto.ErrorMessageDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,34 @@ public class ErrorMessagesHandler {
 
         return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ResponseEntity<ErrorMessageDTO> clienteNaoEncontrado(ClientNotFoundException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, CLIENT_NOT_FOUND);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(OutsideClientException.class)
+    public ResponseEntity<ErrorMessageDTO> clienteNaoEdaBaseAtendente(OutsideClientException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, CLIENT_NOT_FOUND_IN_ATENDENTE_AREA);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ServerNotFoundException.class)
+    public ResponseEntity<ErrorMessageDTO> servidorNaoEncontrado(ServerNotFoundException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, SERVER_NOT_FOUND);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+    }
+
+//    @ExceptionHandler(UnknownException.class)
+//    public ResponseEntity<ErrorMessageDTO> prestadorNaoEncontrado(UnknownException ex) {
+//        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, UNKNOWN_ERROR);
+//
+//        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+//    }
 
     private ErrorMessageDTO buildErrorMessage(RuntimeException ex, String errorCode) {
         ErrorMessageDTO errorMessageDTO = new ErrorMessageDTO();
