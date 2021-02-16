@@ -49,11 +49,7 @@ public class AtendimentoController {
 
         try {
             atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
-        } catch (CamelExecutionException e) {
-            throw e.getCause();
-        }
 
-        try {
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),
                     "base", atendente.getBase(), ClienteResponseDTO.class);
