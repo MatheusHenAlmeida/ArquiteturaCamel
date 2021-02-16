@@ -172,8 +172,11 @@ public class HttpRoutes extends RouteBuilder {
             .to("http4://" + clienteUrl)
             .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO.class)
             .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new ClientNotFoundException("Não foi possível encontrar o cliente desejado"))
+                .endChoice()
                 .when(simple("${header.base} != ${body.getBase()}"))
-                    .setBody(constant(""))
+                    .throwException(new OutsideClientException("Só um atendente da mesma base do cliente pode abrir uma OS"))
                 .endChoice()
             .end();
     }

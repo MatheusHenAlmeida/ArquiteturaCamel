@@ -60,7 +60,7 @@ public class AtendimentoController {
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),
                     "base", atendente.getBase(), ClienteResponseDTO.class);
         } catch (CamelExecutionException e) {
-            throw new AtendenteNotFoundException("Só um atendente da mesma base do cliente pode abrir uma OS");
+            throw e.getCause();
         }
         
         PrestadorResponseDTO prestador = new PrestadorResponseDTO();
