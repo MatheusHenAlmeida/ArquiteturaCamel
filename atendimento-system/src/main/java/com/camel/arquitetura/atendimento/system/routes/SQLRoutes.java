@@ -18,7 +18,12 @@ public class SQLRoutes extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         from("direct:get-ordens-servico")
-            .to("sql:SELECT * FROM ordem_servico")
+            .doTry()
+                .to("sql:SELECT * FROM ordem_servico")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .marshal().json(JsonLibrary.Gson);
         
@@ -30,7 +35,12 @@ public class SQLRoutes extends RouteBuilder {
         
         from("direct:get-ordem-by-id")
             // :#id serve se houver no header e usando componente sql
-            .to("sql:SELECT * FROM ordem_servico WHERE id = :#id")
+            .doTry()
+                .to("sql:SELECT * FROM ordem_servico WHERE id = :#id")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .process(new GetFirstOrdemServicoProcessor())
             .marshal().json(JsonLibrary.Gson);
@@ -38,7 +48,12 @@ public class SQLRoutes extends RouteBuilder {
         from("direct:update-ordem-by-id")
             .to("direct:supervisor-analista-credentials")
             .setProperty("userId", simple("${header.id}"))
-            .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
+            .doTry()
+                .toD("sql:UPDATE ordem_servico SET atendida = true WHERE id = ${header.id}")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .to("direct:get-ordem-by-id")
             .unmarshal().json(JsonLibrary.Gson, OrdemServico.class);
 

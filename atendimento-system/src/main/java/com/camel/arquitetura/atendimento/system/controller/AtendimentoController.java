@@ -80,33 +80,57 @@ public class AtendimentoController {
     }
     
     @GetMapping
-    public List<OrdemServico> getAll() {
-        String response = template.requestBody("direct:get-ordens-servico", "", String.class);
+    public List<OrdemServico> getAll() throws Throwable {
+        String response;
+        try {
+            response = template.requestBody("direct:get-ordens-servico", "", String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
         List<OrdemServico> list = new Gson().fromJson(response, listType);
         return list;
     }
     
     @GetMapping("/opened")
-    public List<OrdemServico> getAllOpened() {
+    public List<OrdemServico> getAllOpened() throws Throwable {
         return filterByStatus(false);
     }
     
     @GetMapping("/closed")
-    public List<OrdemServico> getAllClosed() {
+    public List<OrdemServico> getAllClosed() throws Throwable {
         return filterByStatus(true);
     }
     
-    private List<OrdemServico> filterByStatus(boolean status) {
-        String response = template.requestBodyAndHeader("direct:get-ordens-by-status", "", "os-status", status, String.class);
+    private List<OrdemServico> filterByStatus(boolean status) throws Throwable {
+        String response;
+        try {
+            response = template.requestBodyAndHeader("direct:get-ordens-by-status", "", "os-status", status, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         Type listType = new TypeToken<ArrayList<OrdemServico>>(){}.getType();
         List<OrdemServico> list = new Gson().fromJson(response, listType);
         return list;
     }
     
     @GetMapping("/{id}")
-    public OrdemServico getById(@PathVariable Long id) {
-        String response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+    public OrdemServico getById(@PathVariable Long id) throws Throwable {
+        String response;
+        try {
+            response = template.requestBodyAndHeader("direct:get-ordem-by-id", "", "id", id, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         OrdemServico os = new Gson().fromJson(response, OrdemServico.class);
         return os;
     }
@@ -130,8 +154,10 @@ public class AtendimentoController {
         OrdemServico ordemServico;
         try {
             ordemServico = template.requestBodyAndHeaders("direct:update-ordem-by-id", "", headers, OrdemServico.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
         } catch (Exception e) {
-            throw new Exception("Não foi possível fechar a ordem de serviço");
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         return ordemServico;
