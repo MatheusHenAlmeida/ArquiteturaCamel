@@ -46,6 +46,7 @@ public class AtendimentoController {
     public OrdemServico createOrdemServico(@RequestBody CreateOrdemServicoDTO createOrdemServicoDTO) throws Throwable {
         ClienteResponseDTO cliente;
         AtendenteResponseDTO atendente;
+        PrestadorResponseDTO prestador;
 
         try {
             atendente = template.requestBody("direct:get-atendente", createOrdemServicoDTO.getUserId().toString(), AtendenteResponseDTO.class);
@@ -53,18 +54,12 @@ public class AtendimentoController {
             // Busca cliente por razao social e ja verifica se e da mesma base do atendente
             cliente = template.requestBodyAndHeader("direct:get-cliente-by-name", createOrdemServicoDTO.getNomeCliente(),
                     "base", atendente.getBase(), ClienteResponseDTO.class);
+
+            prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
         } catch (CamelExecutionException e) {
             throw e.getCause();
         }
-        
-        PrestadorResponseDTO prestador = new PrestadorResponseDTO();
-        
-        try {
-            prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
-        } catch (CamelExecutionException e) {
-            throw new PrestadorNotFoundException("Não há prestador na região");
-        }
-        
+
         Map<String, Object> headers = new HashMap<String, Object>();
         headers.put("cliente", cliente);
         headers.put("prestador", prestador);

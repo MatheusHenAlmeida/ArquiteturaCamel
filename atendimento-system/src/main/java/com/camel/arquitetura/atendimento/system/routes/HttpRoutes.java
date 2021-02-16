@@ -77,7 +77,7 @@ public class HttpRoutes extends RouteBuilder {
             .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
             .choice()
                 .when(simple("${body.getBase()} != ${property.atendente.getBase()}"))
-                    .throwException(new OutsideClientException(" Cliente não pertence à base do atendente"))
+                    .throwException(new OutsideClientException("Cliente não pertence à base do atendente"))
                 .endChoice()
             .end();
         
@@ -111,8 +111,18 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.GET))
             .setHeader(Exchange.HTTP_PATH, simple("prestadores/base/${body}"))
             .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class);
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO.class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end()
+            .choice()
+                .when(simple("${body} == null"))
+                    .throwException(new PrestadorNotFoundException("Não existe prestador nesta base"))
+                .endChoice()
+            .end();
         
         // Rotas de integracao com sistema de clientes
         from("direct:get-clientes")
