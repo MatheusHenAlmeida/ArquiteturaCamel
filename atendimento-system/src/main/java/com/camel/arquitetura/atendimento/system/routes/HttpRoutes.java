@@ -60,8 +60,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("prestadores"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
-            .to("http4://" + prestadorUrl)
-            .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO[].class)
+            .doTry()
+                .to("http4://" + prestadorUrl)
+                .unmarshal().json(JsonLibrary.Gson, PrestadorResponseDTO[].class)
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de prestadores"))
+            .end()
             .process(new FilterPrestadoresByBaseProcessor());
         
         from("direct:get-prestador-by-id")
