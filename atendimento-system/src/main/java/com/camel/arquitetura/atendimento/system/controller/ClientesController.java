@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.camel.arquitetura.atendimento.system.exceptions.UnknownException;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,9 +28,17 @@ public class ClientesController {
     private ProducerTemplate producerTemplate;
     
     @GetMapping()
-    public List<ClienteResponseDTO> getAll(@RequestHeader Long userId) {
-        ClienteResponseDTO[] clientes = producerTemplate.requestBodyAndHeader("direct:get-clientes", "", 
-                "userId", userId, ClienteResponseDTO[].class);
+    public List<ClienteResponseDTO> getAll(@RequestHeader Long userId) throws Throwable {
+        ClienteResponseDTO[] clientes = null;
+        try {
+            clientes = producerTemplate.requestBodyAndHeader("direct:get-clientes", "",
+                    "userId", userId, ClienteResponseDTO[].class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         return Arrays.asList(clientes);
     }
     

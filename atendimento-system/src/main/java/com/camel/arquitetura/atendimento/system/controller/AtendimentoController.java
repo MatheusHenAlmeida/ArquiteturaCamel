@@ -57,6 +57,8 @@ public class AtendimentoController {
             prestador = template.requestBody("direct:get-prestador-by-base", cliente.getBase(), PrestadorResponseDTO.class);
         } catch (CamelExecutionException e) {
             throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
 
         Map<String, Object> headers = new HashMap<String, Object>();
@@ -109,6 +111,8 @@ public class AtendimentoController {
             atendente = template.requestBody("direct:get-atendente", userId.toString(), AtendenteResponseDTO.class);
         } catch (CamelExecutionException e) {
             throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
         }
         
         Map<String, Object> headers = new HashMap();

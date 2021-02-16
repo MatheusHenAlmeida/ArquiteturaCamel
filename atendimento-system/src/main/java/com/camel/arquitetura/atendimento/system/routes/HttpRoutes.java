@@ -133,8 +133,13 @@ public class HttpRoutes extends RouteBuilder {
             .setHeader(Exchange.HTTP_PATH, simple("clientes"))
             .setHeader(Exchange.CONTENT_TYPE, simple("application/json"))
             .setBody(simple(""))
+            .doTry()
             .to("http4://" + clienteUrl)
-            .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO[].class)
+                .unmarshal().json(JsonLibrary.Gson, ClienteResponseDTO[].class)
+                .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new ServerNotFoundException("Não foi possível acessar o servidor de clientes"))
+            .end()
             .process(new FilterClientesByBaseProcessor());
         
         from("direct:get-cliente-by-id")
