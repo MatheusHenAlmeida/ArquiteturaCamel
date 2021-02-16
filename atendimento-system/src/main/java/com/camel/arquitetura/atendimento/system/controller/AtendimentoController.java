@@ -66,8 +66,16 @@ public class AtendimentoController {
         headers.put("prestador", prestador);
         headers.put("descricao", createOrdemServicoDTO.getDescricao());
         
-        String os = template.requestBodyAndHeaders("direct:insert-ordem-servico", "", headers, String.class);
-        
+        String os;
+
+        try {
+            os = template.requestBodyAndHeaders("direct:insert-ordem-servico", "", headers, String.class);
+        } catch (CamelExecutionException e) {
+            throw e.getCause();
+        } catch (Exception e) {
+            throw new UnknownException("Ocorreu um erro inesperado");
+        }
+
         return new Gson().fromJson(os, OrdemServico.class);
     }
     

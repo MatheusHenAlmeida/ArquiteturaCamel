@@ -1,6 +1,7 @@
 package com.camel.arquitetura.atendimento.system.routes;
 
 import com.camel.arquitetura.atendimento.system.exceptions.CredentialsInvalidException;
+import com.camel.arquitetura.atendimento.system.exceptions.DbErrorConnectionException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
@@ -63,14 +64,19 @@ public class SQLRoutes extends RouteBuilder {
             .log("Cliente: ${header.cliente.getRazaoSocial()} - "
                     + "Prestador: ${header.prestador.getRazaoSocial()} - "
                     + "Descricao: ${header.descricao}")
-            .toD("sql:INSERT INTO "
+            .doTry()
+                .toD("sql:INSERT INTO "
                     + "ordem_servico(prestador_nome, prestador_email, prestador_telefone, cliente_nome, "
                     + "cliente_endereco, cliente_email, cliente_telefone, descricao) "
                     + "VALUES ('${header.prestador.getRazaoSocial()}', '${header.prestador.getEmail()}', "
                     + "'${header.prestador.getTelefone()}', '${header.cliente.getRazaoSocial()}', "
                     + "'${header.cliente.getEndereco()}', '${header.cliente.getEmail()}',"
                     + "'${header.cliente.getTelefone()}', '${header.descricao}')")
-            .to("sql:SELECT * FROM ordem_servico WHERE id = LAST_INSERT_ID()")
+                .to("sql:SELECT * FROM ordem_servico WHERE id = LAST_INSERT_ID()")
+            .endDoTry()
+            .doCatch(Exception.class)
+                .throwException(new DbErrorConnectionException("Erro ao conectar com o banco de ordens de serviço"))
+            .end()
             .process(new GenerateOrdemServicoListProcessor())
             .process(new GetFirstOrdemServicoProcessor())
             .marshal().json(JsonLibrary.Gson);

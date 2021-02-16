@@ -63,6 +63,13 @@ public class ErrorMessagesHandler {
         return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(DbErrorConnectionException.class)
+    public ResponseEntity<ErrorMessageDTO> dbNaoEncontrado(DbErrorConnectionException ex) {
+        ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, DATABASE_NOT_FOUND);
+
+        return new ResponseEntity(errorMessageDTO, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(UnknownException.class)
     public ResponseEntity<ErrorMessageDTO> prestadorNaoEncontrado(UnknownException ex) {
         ErrorMessageDTO errorMessageDTO = buildErrorMessage(ex, UNKNOWN_ERROR);
