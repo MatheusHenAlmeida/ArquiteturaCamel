@@ -15,8 +15,8 @@ services:
     container_name: cliente-db
     image: cliente-db
     ports: 
-      - "3306:3306"
-      - "33060:33060"
+      - "3307:3306"
+      - "33061:33060"
   
   prestador-db:
     restart: always
@@ -24,8 +24,8 @@ services:
     container_name: prestador-db
     image: prestador-db
     ports: 
-      - "3306:3306"
-      - "33060:33060"
+      - "3308:3306"
+      - "33062:33060"
 
   ordem-servico-db:
     restart: always
@@ -33,5 +33,5 @@ services:
     container_name: ordem-servico-db
     image: ordem-servico-db
     ports: 
-      - "3306:3306"
-      - "33060:33060"
+      - "3309:3306"
+      - "33063:33060"
