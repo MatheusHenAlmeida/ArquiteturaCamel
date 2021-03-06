@@ -1,0 +1,37 @@
+version: "3.3"
+services:
+  atendente-db:
+    restart: always
+    build: "./atendente-server"
+    container_name: atendente-db
+    image: atendente-db
+    ports: 
+      - "3306:3306"
+      - "33060:33060"
+
+  cliente-db:
+    restart: always
+    build: "./cliente-server"
+    container_name: cliente-db
+    image: cliente-db
+    ports: 
+      - "3306:3306"
+      - "33060:33060"
+  
+  prestador-db:
+    restart: always
+    build: "./prestador-server"
+    container_name: prestador-db
+    image: prestador-db
+    ports: 
+      - "3306:3306"
+      - "33060:33060"
+
+  ordem-servico-db:
+    restart: always
+    build: "./ordem-servico-server"
+    container_name: ordem-servico-db
+    image: ordem-servico-db
+    ports: 
+      - "3306:3306"
+      - "33060:33060"
